@@ -1,35 +1,10 @@
 import functools
+import random
+
 from vv.questions_parser import *
 from vv.finder import *
 from vv.markers import *
 from vv.questions import *
-
-# Власне висловлення у BNF
-#
-# <власне_висловлення> ::= АБЗАЦ <теза>
-#                          АБЗАЦ <аргумент>
-#                          АБЗАЦ <приклад_із_літератури>
-#                          АБЗАЦ <аргумент>
-#                          АБЗАЦ <приклад_із_життя>
-#                          АБЗАЦ <висновок> ;
-#
-# <теза> ::= <речення_гачок>
-#            <слово_маркер_теза> <речення_тези> ;
-# <речення_тези> ::= <своя_думка> [ ',' <теза_арг_початок> <коротко_про_арг1> <теза_арг_сполучник> <коротко_про_ар2> ] ;
-#
-# <аргумент> ::= <слово_маркер_аргумент> <речення_аргументу>* ;
-#
-# <приклад_із_літератури> ::= <слово_маркер_приклад> <речення_джерело_приклада> <речення_приклада>* ;
-#
-# <приклад_із_життя> ::= <речення_приклада>* ;
-#
-# <висновок> ::= <слово_маркер_висновок> <речення_висновку> ;
-#
-#
-# Алгоритм:
-# 1. Визначити тип тези.
-# 2. Розпарсити тезу. (як?)
-
 
 def make_sentence(txt: str) -> str:
     work = transform_text(txt.split('.')[0].strip())
@@ -109,6 +84,8 @@ class Argument:
     long_form: str
     is_first: bool
 
+    connection: str
+
     sentence1: str
     sentence2: str
 
@@ -152,8 +129,14 @@ class Argument:
         self.long_form = self.short_form + '. ' + self.sentence2
 
     def generate(self) -> str:
+        connection = random.choice(argument_connections)
+        if isinstance(self.teza.question, ChoiceQuestion) and random.choice([True, True, True, True, True, False]):
+            connection = random.choice(argument_choice_positive_connections if self.is_first
+                                            else argument_choice_negative_connections)
+            connection = connection.replace('*', self.teza.choice)
+
         result = 'По-перше, ' if self.is_first else 'По-друге, '
-        result += self.long_form
+        result += connection + ' ' + self.long_form
 
         return result
 
@@ -181,6 +164,7 @@ class Example:
 
     def generate_life(self):
         links = find_links(self.argument.short_form + ' приклад з власного життя')
+        links = links[0:len(links)//3]
         found_info = []
         for link in links:
             ps = find_some_info_in_link(link)
@@ -231,8 +215,9 @@ class VV:
         teza_str = teza.generate()
         argument1_str = argument1.generate()
         argument2_str = argument2.generate()
-        example1_str = example1.generate()
-        example2_str = example2.generate()
+        # example1_str = example1.generate()
+        # example2_str = example2.generate()
+        example1_str, example2_str = '', ''
         finale_str = finale.generate()
 
         tab = ' ' * 4

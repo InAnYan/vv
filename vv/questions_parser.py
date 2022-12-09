@@ -3,16 +3,17 @@ from vv.questions import *
 
 
 def transform_text(txt: str) -> str:
-    return re.sub('[?.!,"<>»«()[]{}/\\\']', '', txt.lower()).replace('–', '-')
+    return re.sub('[.?!,"<>»«()[]{}/\\\']', '', txt.lower().strip()).replace('–', '-').replace('?', '')
 
 
 class QuestionParser:
     questions_keywords = {
-        ChoiceQuestion:   [':', ',', 'чи'],
-        CanOrNotQuestion: ['чи', 'може', 'можливо', 'призведе', 'призведуть', 'призвести', 'можлива', 'можна', 'можливе', 'треба', 'необхідно', 'має'],
-        WhyQuestion:      ['за', 'якими', 'критерії', 'критеріями', 'критеріями', 'чинники', 'що', 'у', 'чому'],
-        WhichQuestion:    ['чому'],
-        HowMuchQuestion:  ['на', 'скільки']
+        ChoiceQuestion: [':', ',', 'чи'],
+        CanOrNotQuestion: ['чи', 'може', 'можливо', 'призведе', 'призведуть', 'призвести', 'можлива', 'можна', 'треба',
+                           'можливе', 'необхідно', 'має'],
+        WhyQuestion: ['за', 'якими', 'критерії', 'критеріями', 'критеріями', 'чинники', 'що', 'у', 'чому'],
+        WhichQuestion: ['чому'],
+        HowMuchQuestion: ['на', 'скільки']
     }
 
     orig_str: str
@@ -49,7 +50,7 @@ class QuestionParser:
         choices = work_str.split('чи')
 
         for i in range(len(choices)):
-            choices[i] = choices[i].strip()
+            choices[i] = transform_text(choices[i])
 
         if first_delimeter == -1:
             return ChoiceQuestion(self.orig_str, '<не вдалося виділити \'about\'>', choices)
@@ -93,11 +94,11 @@ class QuestionParser:
         words = list(filter(lambda x: x != '', split_txt))
 
         types_dict = {
-            ChoiceQuestion:   0,
+            ChoiceQuestion: 0,
             CanOrNotQuestion: 0,
-            WhyQuestion:      0,
-            WhichQuestion:    0,
-            HowMuchQuestion:  0
+            WhyQuestion: 0,
+            WhichQuestion: 0,
+            HowMuchQuestion: 0
         }
 
         i = 0

@@ -19,7 +19,7 @@ def find_some_info_in_link(link: str) -> [str]:
         for e in ps:
             res.append(e.text)
         return res
-    except: # TODO: This is very bad move
+    except:  # TODO: This is very bad move
         return find_some_info_in_link(link)
 
 
